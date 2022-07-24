@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+  namespace: playground
+  labels:
+    app: web-server
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      containers:
+        - name: web-server
+          image: asia-northeast1-docker.pkg.dev/playground-apps/samples/web_server:v1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: PROJECT_ID
+              value: playground-apps
