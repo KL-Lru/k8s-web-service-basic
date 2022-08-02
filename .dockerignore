@@ -3,3 +3,5 @@ k8s/
 log/
 scripts/
 Makefile
+
+*_credential.json
