@@ -26,7 +26,7 @@ resource "google_container_cluster" "primary" {
 resource "google_container_node_pool" "primary_node_pool" {
   project    = var.project_id
   name       = "sample-nodes"
-  node_count = 1
+  node_count = 3
   location   = var.location
   cluster    = google_container_cluster.primary.name
 
