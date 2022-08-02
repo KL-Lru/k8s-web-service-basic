@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+  namespace: playground
+  labels:
+    app: web-server
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: web-server
+  template:
+    metadata:
+      labels:
+        app: web-server
+    spec:
+      volumes:
+        - name: sql-credential
+          secret:
+            secretName: sql-credential
+        - name: publisher-credential
+          secret:
+            secretName: publisher-credential
+      containers:
+        - name: web-server
+          image: asia-northeast1-docker.pkg.dev/playground-apps/samples/web_server:v1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: psql-secret
+          env:
+            - name: PROJECT_ID
+              value: playground-apps
+            - name: POSTGRES_DB_HOST
+              value: 127.0.0.1
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/publisher_credential.json
+          volumeMounts:
+            - name: publisher-credential
+              mountPath: /var/secrets/google
+        - name: sql-proxy
+          image: "gcr.io/cloudsql-docker/gce-proxy:1.31.1"
+          command:
+            - "/cloud_sql_proxy"
+            - "-verbose=false"
+            - "-instances=playground-apps:asia-northeast1:primary0=tcp:5432"
+          volumeMounts:
+            - name: sql-credential
+              mountPath: /var/secrets/google
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/sql_credential.json
+          securityContext:
+            runAsNonRoot: true
+          ports:
+            - containerPort: 5432

@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-worker
+  namespace: playground
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      parallelism: 1
+      completions: 1
+      backoffLimit: 3
+      template:
+        spec:
+          containers:
+            - name: batch-worker
+              image: asia-northeast1-docker.pkg.dev/playground-apps/samples/batch_worker:v1.0
+              imagePullPolicy: Always
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  trap "touch /tmp/pod/terminated" EXIT
+                  /go/app/batch_worker
+              volumeMounts:
+                - mountPath: /tmp/pod
+                  name: tmp-pod
+              envFrom:
+                - secretRef:
+                    name: psql-secret
+              env:
+                - name: POSTGRES_DB_HOST
+                  value: 127.0.0.1
+            - name: sql-proxy
+              image: gcr.io/cloudsql-docker/gce-proxy:1.31.1-alpine
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  /cloud_sql_proxy \
+                    -verbose=false \
+                    -instances=playground-apps:asia-northeast1:primary0=tcp:5432 &
+                  PROXY_PID=$!
+                  (
+                    while true
+                    do if [[ -f "/tmp/pod/terminated" ]]
+                    then 
+                      kill $PROXY_PID
+                      break
+                    fi 
+                    sleep 1s
+                    done
+                  ) &
+                  wait $PROXY_PID
+              volumeMounts:
+                - mountPath: /tmp/pod
+                  name: tmp-pod
+                  readOnly: true
+                - name: sql-credential
+                  mountPath: /var/secrets/google
+              env:
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: /var/secrets/google/sql_credential.json
+          volumes:
+            - name: sql-credential
+              secret:
+                secretName: sql-credential
+            - name: tmp-pod
+              emptyDir: {}
+          restartPolicy: Never

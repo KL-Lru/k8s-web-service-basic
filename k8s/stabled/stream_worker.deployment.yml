@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stream-worker
+  namespace: playground
+  labels:
+    app: stream-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stream-worker
+  template:
+    metadata:
+      labels:
+        app: stream-worker
+    spec:
+      containers:
+        - name: stream-worker
+          image: asia-northeast1-docker.pkg.dev/playground-apps/samples/stream_worker:v1.0
+          imagePullPolicy: Always
+          env:
+            - name: PROJECT_ID
+              value: playground-apps
+            - name: SUBSCRIBE_ID
+              value: sample
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/subscriber_credential.json
+          volumeMounts:
+            - name: subscriber-credential
+              mountPath: /var/secrets/google
+          livenessProbe:
+            exec:
+              command: [/go/app/heartbeat_check]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+      volumes:
+        - name: subscriber-credential
+          secret:
+            secretName: subscriber-credential

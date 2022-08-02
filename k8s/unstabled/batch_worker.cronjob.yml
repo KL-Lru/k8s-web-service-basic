@@ -11,5 +11,5 @@ spec:
         spec:
           containers:
           - name: batch-worker
-            image: asia-northeast1-docker.pkg.dev/playground-apps/samples/batch-worker:v1.0
+            image: asia-northeast1-docker.pkg.dev/playground-apps/samples/batch_worker:v1.0
           restartPolicy: Never
