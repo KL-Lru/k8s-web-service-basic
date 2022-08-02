@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -20,6 +21,7 @@ func (s *Server) UsersHandler(writer http.ResponseWriter, request *http.Request)
 func readUsers(s *Server, w http.ResponseWriter, r *http.Request) {
 	users, err := s.Repo.UserList()
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
