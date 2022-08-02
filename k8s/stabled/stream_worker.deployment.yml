@@ -3,10 +3,8 @@ kind: Deployment
 metadata:
   name: stream-worker
   namespace: playground
-  labels:
-    app: stream-worker
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: stream-worker
@@ -18,7 +16,6 @@ spec:
       containers:
         - name: stream-worker
           image: asia-northeast1-docker.pkg.dev/playground-apps/samples/stream_worker:v1.0
-          imagePullPolicy: Always
           env:
             - name: PROJECT_ID
               value: playground-apps

@@ -3,10 +3,8 @@ kind: Deployment
 metadata:
   name: web-server
   namespace: playground
-  labels:
-    app: web-server
 spec:
-  replicas: 3
+  replicas: 4
   selector:
     matchLabels:
       app: web-server
@@ -25,7 +23,6 @@ spec:
       containers:
         - name: web-server
           image: asia-northeast1-docker.pkg.dev/playground-apps/samples/web_server:v1.0
-          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
@@ -80,7 +77,5 @@ spec:
             limits:
               cpu: 100m
               memory: 256Mi
-          securityContext:
-            runAsNonRoot: true
           ports:
             - containerPort: 5432
