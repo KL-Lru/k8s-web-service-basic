@@ -36,6 +36,7 @@ GET  /healthz ヘルスチェック
 GET  /users   SQLデータ参照
 POST /tasks   MQへのメッセージ発行
 ```
+
 #### Requirement
 `GET /users`へのアクセスに対して正常応答するには, 次のusersテーブルを有する, DBへの正確な環境変数値が必要です.
 ```sql
@@ -76,8 +77,10 @@ POSTGRES_DATABASE=<データベース名>
 <summary>stream_worker</summary>
 裏稼働のWorkerサーバです.
 実行するとMQへのStreaming接続を実行, メッセージを常時Subscribeし, 受け取ったメッセージを表示します.
+
 #### Requirement
 正常稼働させるためには, 次の環境変数及びGCPサービスへのアクセス用のcredentialが必要です.
+
 ```.env
 PROJECT_ID=<利用するGCP Project ID>
 SUBSCRIBE_ID=<設定したPub/SubのSubscriber ID>
